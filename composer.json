@@ -1,5 +1,5 @@
 {
-  "name": "digitalstate/camunda-bpm-php-sdk",
+  "name": "digitalstate/bpm-camunda-sdk",
   "description": "PHP SDK for camundaBPM process services",
   "license": "Apache-2.0",
   "minimum-stability": "stable",
