@@ -65,4 +65,21 @@ class Api {
     $this->user               = new UserService($this->restApiUrl);
     $this->variableInstance   = new VariableInstanceService($this->restApiUrl);
   }
+
+  public function setHeaders(array $headers)
+  {
+    $this->authorization->setHeaders($headers);
+    $this->execution->setHeaders($headers);
+    $this->group->setHeaders($headers);
+    $this->history->setHeaders($headers);
+    $this->identity->setHeaders($headers);
+    $this->job->setHeaders($headers);
+    $this->message->setHeaders($headers);
+    $this->processDefinition->setHeaders($headers);
+    $this->processEngine->setHeaders($headers);
+    $this->processInstance->setHeaders($headers);
+    $this->task->setHeaders($headers);
+    $this->user->setHeaders($headers);
+    $this->variableInstance->setHeaders($headers);
+  }
 }

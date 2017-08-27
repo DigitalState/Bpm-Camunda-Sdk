@@ -20,9 +20,11 @@ class RequestService {
   private $requestUrl;
   private $http_status_code;
   private $restApiUrl;
+  private $headers;
 
   public function __construct($restApiUrl) {
     $this->restApiUrl = $restApiUrl;
+    $this->headers = [];
   }
 
   /**
@@ -81,7 +83,19 @@ class RequestService {
     return $this->http_status_code;
   }
 
+  /**
+   * @param array $headers
+   */
+  public function setHeaders(array $headers) {
+    $this->headers = $headers;
+  }
 
+  /**
+   * @return array
+   */
+  public function getHeaders() {
+    return $this->headers;
+  }
 
   /**
    * executes the rest request
@@ -175,10 +189,10 @@ class RequestService {
           curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
           curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->headers, array(
             'Content-Type: application/json',
             'Content-Length: '.strlen($data)
-          ));
+          )));
           $request = curl_exec($ch);
           $this->http_status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
           curl_close($ch);
@@ -187,7 +201,8 @@ class RequestService {
               'http' => array(
                 'method' => 'DELETE',
                 'header' => 'Content-Type: application/json'."\r\n"
-                .'Content-Length:'.strlen($data)."\r\n",
+                .'Content-Length:'.strlen($data)."\r\n"
+                .implode("\r\n", $this->headers)."\r\n",
                 'content' => $data
               )
             )
@@ -203,10 +218,10 @@ class RequestService {
           curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
           curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->headers, array(
             'Content-Type: application/json',
             'Content-Length: '.strlen($data)
-          ));
+          )));
 
           $request = curl_exec($ch);
           $this->http_status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -216,7 +231,8 @@ class RequestService {
               'http' => array(
                 'method' => 'PUT',
                 'header' => 'Content-Type: application/json'."\r\n"
-                .'Content-Length:'.strlen($data)."\r\n",
+                .'Content-Length:'.strlen($data)."\r\n"
+                .implode("\r\n", $this->headers)."\r\n",
                 'content' => $data
               )
             )
@@ -233,10 +249,10 @@ class RequestService {
           curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
           curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+          curl_setopt($ch, CURLOPT_HTTPHEADER, array_merge($this->headers, array(
             'Content-Type: application/json',
             'Content-Length: '.strlen($data)
-          ));
+          )));
           $request = curl_exec($ch);
           $this->http_status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
           curl_close($ch);
@@ -245,7 +261,8 @@ class RequestService {
               'http' => array(
                 'method' => 'POST',
                 'header' => 'Content-Type: application/json'."\r\n"
-                .'Content-Length:'.strlen($data)."\r\n",
+                .'Content-Length:'.strlen($data)."\r\n"
+                .implode("\r\n", $this->headers)."\r\n",
                 'content' => $data
               )
             )
@@ -263,12 +280,19 @@ class RequestService {
         curl_setopt ($ch, CURLOPT_COOKIEJAR, './');
         curl_setopt ($ch, CURLOPT_COOKIEFILE, './');
         curl_setopt ($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
 
         $request = curl_exec($ch);
         $this->http_status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
       } else {
-        $request = file_get_contents($this->restApiUrl.$this->requestUrl.$data);
+        $streamContext = stream_context_create(array(
+            'http' => array(
+              'header' => implode("\r\n", $this->headers)."\r\n"
+            )
+          )
+        );
+        $request = file_get_contents($this->restApiUrl.$this->requestUrl.$data, null, $streamContext);
         $this->http_status_code = substr($http_response_header[0], 9, 3);
       }
         break;
